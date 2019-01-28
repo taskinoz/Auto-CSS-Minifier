@@ -4,9 +4,14 @@
     $stylesheet = $_GET['s'];
     $stylesheetHash = $stylesheet.'.hash';
     $stylesheetMini = explode(".",$stylesheet);
-    $stylesheetMini = $stylesheetMini[0].'.min.'$stylesheetMini[1];
+    $stylesheetMini = $stylesheetMini[0].'.min.'.$stylesheetMini[1];
+    if (file_exists($stylesheetHash)){
+      $getCurrentHash = file_get_contents($stylesheetHash);
+    }
+    else {
+      $getCurrentHash = null;
+    }
 
-    $getCurrentHash = file_get_contents($stylesheetHash);
 
     // Minification function from https://cssminifier.com/
     function minifyCss($cssFile) {
@@ -34,17 +39,37 @@
       return $minified;
     }
 
-    file_put_contents($stylesheetHash, hash_file('md5', $stylesheet));
+    //file_put_contents($stylesheetHash, hash_file('md5', $stylesheet));
 
 
     if (file_exists($stylesheet) && file_exists($stylesheetHash) && hash_file('md5', $stylesheet) == $getCurrentHash) {
-      echo "The file $filename exists";
+      // DO BEFOR
+
+      // DO AFTER
+      header("Content-type: text/css", true);
+      echo file_get_contents($stylesheetMini);
     }
-    elseif (condition) {
-      // code...
+    elseif (file_exists($stylesheet) && file_exists($stylesheetHash) && hash_file('md5', $stylesheet) != $getCurrentHash) {
+      // DO BEFOR
+      file_put_contents($stylesheetHash, hash_file('md5', $stylesheet));
+      file_put_contents($stylesheetMini,minifyCss($stylesheet));
+      // DO AFTER
+      header("Content-type: text/css", true);
+      echo file_get_contents($stylesheet);
+    }
+    elseif (file_exists($stylesheet) && file_exists($stylesheetHash)==false) {
+      file_put_contents($stylesheetHash, hash_file('md5', $stylesheet));
+      file_put_contents($stylesheetMini,minifyCss($stylesheet));
+      // DO AFTER
+      header("Content-type: text/css", true);
+      echo file_get_contents($stylesheet);
     }
     else {
-      hash_file('md5', 'example.txt');
+      // DO BEFOR
+
+      // DO AFTER
+      header("Content-type: text/css", true);
+      echo "body{background:black}/*Stylesheet=$stylesheet*/";
     }
   }
 ?>
